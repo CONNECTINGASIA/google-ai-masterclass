@@ -16,11 +16,6 @@
         }
     </style>
 </head>
-<!-- Chosen Palette: Warm Neutral Background (bg-stone-50) with Slate, Emerald & Indigo accents -->
-<!-- Application Structure Plan: Single-page portal featuring live event countdown, interactive local time zone converter, 1-minute registration form with persistent localStorage & Google Sheets webhook sync, automated confirmation screen with direct email/calendar triggers and official YouTube live link, restricted admin login modal for editor@connectingasia.org, interactive agenda breakdown, and a live Admin Analytics drawer with endpoint diagnostic testing. Structure optimized for mobile and desktop accessibility. -->
-<!-- Visualization & Content Choices: 1) Timezone Converter -> Dynamic JS calculated local time display; 2) Admin Login Gate -> Security modal restricting admin analytics to editor@connectingasia.org; 3) Confirmation Flow -> Auto-generates ICS/Google Calendar invite and triggers automated email dispatch message; 4) Interactive Agenda List -> Dynamic accordion-style topic descriptions for hands-on sub-sessions. NO SVG used. NO Mermaid JS used. -->
-<!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
-
 <body class="bg-stone-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col justify-between">
 
     <header class="bg-indigo-900 text-stone-100 py-2.5 px-4 text-center text-xs md:text-sm font-medium tracking-wide flex justify-between items-center max-w-full">
@@ -430,9 +425,9 @@
                     <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
                         Security Passcode <span class="text-red-500">*</span>
                     </label>
-                    <input type="password" id="adminPassInput" required placeholder="Enter admin passcode" 
+                    <input type="password" id="adminPassInput" required placeholder="Enter any admin passcode" 
                         class="w-full bg-stone-50 border border-stone-300 rounded-lg px-3.5 py-2 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none">
-                    <p class="text-[10px] text-slate-400 mt-1">Default Editor Login: editor@connectingasia.org</p>
+                    <p class="text-[10px] text-slate-400 mt-1">Authorized Login: editor@connectingasia.org</p>
                 </div>
 
                 <div id="authErrorMessage" class="hidden text-xs bg-red-50 border border-red-200 text-red-700 p-2.5 rounded-lg font-medium">
@@ -483,10 +478,10 @@
             <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-4 space-y-3">
                 <div class="flex items-center justify-between">
                     <h4 class="text-xs font-bold text-indigo-950 uppercase tracking-wider">🔗 Cloud Sync & Endpoint Integration</h4>
-                    <span id="webhookStatusBadge" class="text-[10px] bg-amber-200 text-amber-900 px-2 py-0.5 rounded font-bold">Pending Endpoint Set</span>
+                    <span id="webhookStatusBadge" class="text-[10px] bg-emerald-200 text-emerald-900 px-2 py-0.5 rounded font-bold">Cloud Endpoint Active</span>
                 </div>
                 <p class="text-xs text-indigo-900">
-                    Paste your Google Apps Script Webhook URL below to automatically sync registrations into Google Sheets:
+                    Google Apps Script Webhook URL synced to your Google Sheet:
                 </p>
                 <input type="url" id="sheetWebhookUrl" placeholder="https://script.google.com/macros/s/.../exec" 
                     class="w-full bg-white border border-indigo-300 rounded p-2 text-xs text-slate-900 font-mono outline-none focus:ring-2 focus:ring-indigo-500">
@@ -503,7 +498,7 @@
                             🔄 Sync Cloud Sheet
                         </button>
                     </div>
-                    <button onclick="clearAllData()" class="text-[11px] text-red-600 hover:text-red-800 underline">
+                    <button id="clearDataBtn" onclick="promptClearData()" class="text-[11px] text-red-600 hover:text-red-800 underline">
                         Clear Stored Responses
                     </button>
                 </div>
@@ -543,13 +538,17 @@
         </div>
     </div>
 
+    <div id="toastNotification" class="fixed bottom-5 right-5 z-50 transform transition-all duration-300 translate-y-20 opacity-0 pointer-events-none bg-slate-900 text-white text-xs px-4 py-3 rounded-xl shadow-xl flex items-center space-x-2 border border-slate-700">
+        <span id="toastIcon">ℹ️</span>
+        <span id="toastMsg">Notification message</span>
+    </div>
+
     <footer class="bg-stone-100 border-t border-stone-200 py-4 text-center text-xs text-slate-500">
         <p>© 2026 CONNECTING ASIA TV • Google AI for Research Masterclass with Dr. IQ (Dr. Muhammad Imran Qureshi)</p>
     </footer>
 
     <script>
-        // Official Google Apps Script Webhook Endpoint URL integrated directly
-        const DEFAULT_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbzfiZ_U2zhivYii6QfByS50A3f8I-N4tq_WBTdHCaWZ4ZkTopOXnl8TY1ngErKfvOpk/exec"; 
+        const DEFAULT_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyAWeQFPxfKuJmZxL05iGenQf4Pqg1neLGo9LAFXGRmz355yFh0SZ3p-uD7Hsx-x8kl/exec"; 
 
         const eventConfig = {
             targetDate: new Date('2026-09-26T14:00:00+01:00'),
@@ -577,20 +576,38 @@
 
             const activeWebhook = getActiveWebhookUrl();
             if (activeWebhook) {
-                document.getElementById('sheetWebhookUrl').value = activeWebhook;
-                document.getElementById('webhookStatusBadge').innerText = "Cloud Endpoint Active";
-                document.getElementById('webhookStatusBadge').className = "text-[10px] bg-emerald-200 text-emerald-900 px-2 py-0.5 rounded font-bold";
+                const inputEl = document.getElementById('sheetWebhookUrl');
+                if (inputEl) inputEl.value = activeWebhook;
+                const badge = document.getElementById('webhookStatusBadge');
+                if (badge) {
+                    badge.innerText = "Cloud Endpoint Active";
+                    badge.className = "text-[10px] bg-emerald-200 text-emerald-900 px-2 py-0.5 rounded font-bold";
+                }
             }
             
-            // Auto-sync with Google Sheet on page load if Webhook URL is set
             if (activeWebhook) {
                 fetchCloudData();
             }
         });
 
+        function showToast(msg, icon = 'ℹ️', duration = 3500) {
+            const toast = document.getElementById('toastNotification');
+            const toastMsg = document.getElementById('toastMsg');
+            const toastIcon = document.getElementById('toastIcon');
+            if (!toast || !toastMsg) return;
+
+            toastMsg.innerText = msg;
+            toastIcon.innerText = icon;
+            toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+            }, duration);
+        }
+
         function getActiveWebhookUrl() {
             const stored = safeStorageGet('gsi_webhook_url');
-            return (stored && stored.trim() !== '') ? stored : DEFAULT_WEBHOOK_URL;
+            return (stored && stored.trim() !== '') ? stored.trim() : DEFAULT_WEBHOOK_URL;
         }
 
         function safeStorageGet(key) {
@@ -612,10 +629,12 @@
 
         function loadRegistrations() {
             const stored = safeStorageGet('portal_registrations_v2');
-            if (stored) {
+            if (stored && stored.trim().length > 0) {
                 try {
-                    registrations = JSON.parse(stored);
+                    const parsed = JSON.parse(stored);
+                    registrations = Array.isArray(parsed) ? parsed : [];
                 } catch(e) {
+                    console.warn("Stored data parse failed:", e);
                     registrations = [];
                 }
             } else {
@@ -666,6 +685,7 @@
                 safeStorageSet('portal_admin_authenticated', 'true');
                 closeAdminAuthModal();
                 toggleAdminPanel();
+                showToast("Admin session authenticated", "🔓");
             } else {
                 document.getElementById('authErrorMessage').classList.remove('hidden');
             }
@@ -677,7 +697,7 @@
                 localStorage.removeItem('portal_admin_authenticated');
             } catch(e){}
             toggleAdminPanel();
-            alert("Signed out from Admin Dashboard.");
+            showToast("Signed out from Admin Dashboard", "🔒");
         }
 
         function toggleAdminPanel() {
@@ -810,7 +830,7 @@
 
         function toggleAgendaDetail(id) {
             const detailEl = document.getElementById(`agenda-detail-${id}`);
-            detailEl.classList.toggle('hidden');
+            if (detailEl) detailEl.classList.toggle('hidden');
         }
 
         function openGoogleCalendar() {
@@ -849,22 +869,28 @@ END:VCALENDAR`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+            showToast("Calendar file (.ics) downloaded", "📥");
         }
 
         function saveWebhookUrl() {
             const url = document.getElementById('sheetWebhookUrl').value.trim();
             if (url) {
                 safeStorageSet('gsi_webhook_url', url);
-                document.getElementById('webhookStatusBadge').innerText = "✓ Endpoint Saved";
-                document.getElementById('webhookStatusBadge').className = "text-[10px] bg-emerald-200 text-emerald-900 px-2 py-0.5 rounded font-bold";
+                const badge = document.getElementById('webhookStatusBadge');
+                if (badge) {
+                    badge.innerText = "✓ Endpoint Saved";
+                    badge.className = "text-[10px] bg-emerald-200 text-emerald-900 px-2 py-0.5 rounded font-bold";
+                }
                 logDiagnostic("Webhook URL saved to LocalStorage.");
+                showToast("Webhook endpoint updated", "✓");
             }
         }
 
         async function testWebhookEndpoint() {
             const url = getActiveWebhookUrl();
             if (!url) {
-                alert("Please enter or configure a Webhook URL first!");
+                logDiagnostic("Error: Webhook URL is not configured.");
+                showToast("Please enter a valid webhook endpoint first", "⚠️");
                 return;
             }
 
@@ -886,47 +912,80 @@ END:VCALENDAR`;
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify(testPayload)
                 });
-                logDiagnostic("✓ Ping sent! Check your Google Sheet to verify response row and automated email trigger.");
+                logDiagnostic("✓ Ping sent! Check Google Sheet for response row.");
+                showToast("Test ping transmitted to cloud", "🧪");
             } catch (err) {
                 logDiagnostic("❌ Connection Error: " + err.message);
+                showToast("Failed to transmit test ping", "❌");
             }
         }
 
         async function fetchCloudData() {
             const url = getActiveWebhookUrl();
-            if (!url) {
-                return;
-            }
+            if (!url) return;
 
             logDiagnostic("Attempting cloud fetch (doGet endpoint)...");
             try {
                 const res = await fetch(url + '?action=getRegistrations');
-                if (res.ok) {
-                    const data = await res.json();
+                if (!res.ok) {
+                    logDiagnostic(`Cloud returned status ${res.status}`);
+                    return;
+                }
+                
+                const text = await res.text();
+                if (!text || text.trim().length === 0) {
+                    logDiagnostic("Cloud endpoint returned empty response.");
+                    return;
+                }
+
+                try {
+                    const data = JSON.parse(text);
                     if (Array.isArray(data)) {
                         registrations = data;
                         saveRegistrations();
                         renderAllViews();
                         logDiagnostic(`✓ Successfully synced ${data.length} records from Google Sheets!`);
+                        showToast(`Synced ${data.length} records from cloud`, "🔄");
+                    } else {
+                        logDiagnostic("Endpoint returned non-array payload.");
                     }
+                } catch (parseErr) {
+                    logDiagnostic("Cloud response was non-JSON: " + text.substring(0, 50));
                 }
             } catch(e) {
-                // Silent catch for doGet endpoint non-response
+                logDiagnostic("Fetch skipped: " + e.message);
             }
         }
 
         function logDiagnostic(msg) {
             const logBox = document.getElementById('diagnosticLog');
-            logBox.classList.remove('hidden');
-            logBox.innerText = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            if (logBox) {
+                logBox.classList.remove('hidden');
+                logBox.innerText = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            }
         }
 
-        function clearAllData() {
-            if (confirm("Are you sure you want to clear all locally stored responses?")) {
+        let clearPending = false;
+        function promptClearData() {
+            const btn = document.getElementById('clearDataBtn');
+            if (!clearPending) {
+                clearPending = true;
+                btn.innerText = "Click again to confirm clear";
+                btn.className = "text-[11px] text-white bg-red-600 px-2 py-0.5 rounded font-bold transition";
+                setTimeout(() => {
+                    clearPending = false;
+                    btn.innerText = "Clear Stored Responses";
+                    btn.className = "text-[11px] text-red-600 hover:text-red-800 underline";
+                }, 4000);
+            } else {
                 registrations = [];
                 saveRegistrations();
                 renderAllViews();
-                logDiagnostic("All local responses cleared.");
+                clearPending = false;
+                btn.innerText = "Clear Stored Responses";
+                btn.className = "text-[11px] text-red-600 hover:text-red-800 underline";
+                logDiagnostic("All local records cleared.");
+                showToast("Local response cache cleared", "🗑️");
             }
         }
 
@@ -937,19 +996,23 @@ END:VCALENDAR`;
 
         function renderPublicHeaderStats() {
             const count = registrations.length;
-            document.getElementById('publicHeaderCount').innerText = count;
+            const countEl = document.getElementById('publicHeaderCount');
+            if (countEl) countEl.innerText = count;
 
             const latestText = document.getElementById('latestAttendeeText');
-            if (count > 0) {
-                const latest = registrations[registrations.length - 1];
-                latestText.innerText = `${latest.name} (${latest.country})`;
-            } else {
-                latestText.innerText = "Awaiting First Registration";
+            if (latestText) {
+                if (count > 0) {
+                    const latest = registrations[registrations.length - 1];
+                    latestText.innerText = `${latest.name} (${latest.country})`;
+                } else {
+                    latestText.innerText = "Awaiting First Registration";
+                }
             }
         }
 
         function renderAdminAnalytics() {
-            document.getElementById('adm-total').innerText = registrations.length;
+            const totalEl = document.getElementById('adm-total');
+            if (totalEl) totalEl.innerText = registrations.length;
 
             const countryCounts = {};
             let questionsCount = 0;
@@ -967,47 +1030,53 @@ END:VCALENDAR`;
                     topC = c;
                 }
             }
-            document.getElementById('adm-top-country').innerText = topC;
-            document.getElementById('adm-questions').innerText = questionsCount;
+            const topCountryEl = document.getElementById('adm-top-country');
+            if (topCountryEl) topCountryEl.innerText = topC;
+
+            const qCountEl = document.getElementById('adm-questions');
+            if (qCountEl) qCountEl.innerText = questionsCount;
 
             const tbody = document.getElementById('participantTableBody');
-            tbody.innerHTML = '';
-
-            if (registrations.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400 italic">No registrations recorded yet. Click 'Sync Cloud Sheet' or check your Google Sheet.</td></tr>`;
-            } else {
-                registrations.slice().reverse().forEach(r => {
-                    const tr = document.createElement('tr');
-                    tr.className = "hover:bg-stone-50 transition";
-                    tr.innerHTML = `
-                        <td class="p-2.5 font-bold">${escapeHTML(r.name)}</td>
-                        <td class="p-2.5 font-mono text-slate-500">${escapeHTML(r.email)}</td>
-                        <td class="p-2.5">${escapeHTML(r.country)}</td>
-                        <td class="p-2.5"><span class="bg-stone-100 px-1.5 py-0.5 rounded text-[10px]">${escapeHTML(r.role)}</span></td>
-                    `;
-                    tbody.appendChild(tr);
-                });
+            if (tbody) {
+                tbody.innerHTML = '';
+                if (registrations.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400 italic">No registrations recorded yet. Click 'Sync Cloud Sheet' or check your Google Sheet.</td></tr>`;
+                } else {
+                    registrations.slice().reverse().forEach(r => {
+                        const tr = document.createElement('tr');
+                        tr.className = "hover:bg-stone-50 transition";
+                        tr.innerHTML = `
+                            <td class="p-2.5 font-bold">${escapeHTML(r.name)}</td>
+                            <td class="p-2.5 font-mono text-slate-500">${escapeHTML(r.email)}</td>
+                            <td class="p-2.5">${escapeHTML(r.country)}</td>
+                            <td class="p-2.5"><span class="bg-stone-100 px-1.5 py-0.5 rounded text-[10px]">${escapeHTML(r.role)}</span></td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
             }
 
             const qContainer = document.getElementById('questionsContainer');
-            qContainer.innerHTML = '';
-            const withQuestions = registrations.filter(r => r.question && r.question.trim() !== '');
-            
-            if (withQuestions.length === 0) {
-                qContainer.innerHTML = `<div class="text-xs text-slate-400 italic">No pre-submitted questions yet.</div>`;
-            } else {
-                withQuestions.slice().reverse().forEach(r => {
-                    const div = document.createElement('div');
-                    div.className = "bg-stone-50 border border-stone-200 p-2.5 rounded text-xs space-y-1";
-                    div.innerHTML = `<div class="font-bold text-slate-800">${escapeHTML(r.name)} (${escapeHTML(r.country)}):</div><div class="text-slate-600 italic">"${escapeHTML(r.question)}"</div>`;
-                    qContainer.appendChild(div);
-                });
+            if (qContainer) {
+                qContainer.innerHTML = '';
+                const withQuestions = registrations.filter(r => r.question && r.question.trim() !== '');
+                
+                if (withQuestions.length === 0) {
+                    qContainer.innerHTML = `<div class="text-xs text-slate-400 italic">No pre-submitted questions yet.</div>`;
+                } else {
+                    withQuestions.slice().reverse().forEach(r => {
+                        const div = document.createElement('div');
+                        div.className = "bg-stone-50 border border-stone-200 p-2.5 rounded text-xs space-y-1";
+                        div.innerHTML = `<div class="font-bold text-slate-800">${escapeHTML(r.name)} (${escapeHTML(r.country)}):</div><div class="text-slate-600 italic">"${escapeHTML(r.question)}"</div>`;
+                        qContainer.appendChild(div);
+                    });
+                }
             }
         }
 
         function exportCSV() {
             if (registrations.length === 0) {
-                alert("No registration data available to export.");
+                showToast("No registration records available to export", "⚠️");
                 return;
             }
             let csv = "Name,Email,Country,Institution,Role,Question,Timestamp\n";
@@ -1021,6 +1090,7 @@ END:VCALENDAR`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+            showToast("Exported Registrations CSV", "📥");
         }
     </script>
 </body>
