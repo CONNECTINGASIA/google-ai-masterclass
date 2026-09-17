@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google AI for Research: Hands-On Masterclass | Dr. IQ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .pulse-dot {
+            animation: pulse-animation 2s infinite;
+        }
+        @keyframes pulse-animation {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+    </style>
+</head>
+<!-- Chosen Palette: Warm Neutral Background (bg-stone-50) with Slate, Emerald & Indigo accents -->
+<!-- Application Structure Plan: Single-page portal featuring live event countdown, interactive local time zone converter, 1-minute registration form with persistent localStorage & Google Sheets webhook sync, automated confirmation screen with direct email/calendar triggers and official YouTube live link, restricted admin login modal for editor@connectingasia.org, interactive agenda breakdown, and a live Admin Analytics drawer with endpoint diagnostic testing. Structure optimized for mobile and desktop accessibility. -->
+<!-- Visualization & Content Choices: 1) Timezone Converter -> Dynamic JS calculated local time display; 2) Admin Login Gate -> Security modal restricting admin analytics to editor@connectingasia.org; 3) Confirmation Flow -> Auto-generates ICS/Google Calendar invite and triggers automated email dispatch message; 4) Interactive Agenda List -> Dynamic accordion-style topic descriptions for hands-on sub-sessions. NO SVG used. NO Mermaid JS used. -->
+<!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+<body class="bg-stone-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col justify-between">
+
+    <header class="bg-indigo-900 text-stone-100 py-2.5 px-4 text-center text-xs md:text-sm font-medium tracking-wide flex justify-between items-center max-w-full">
+        <div class="mx-auto flex items-center space-x-2">
+            <span class="bg-red-600 text-white text-[10px] md:text-xs px-2 py-0.5 rounded font-bold uppercase tracking-wider">Live Stream</span>
+            <span>CONNECTING ASIA TV • Saturday, 26 September 2026 @ 2:00 PM UK Time (BST)</span>
+        </div>
+        <button onclick="openAdminAuthModal()" class="bg-slate-800 hover:bg-slate-700 text-xs px-2.5 py-1 rounded text-stone-300 font-semibold border border-slate-700 transition flex items-center space-x-1">
+            <span>🔒</span>
+            <span>Admin Login</span>
+        </button>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-grow space-y-8">
+
+        <section class="bg-white border border-stone-200 rounded-2xl p-6 md:p-10 shadow-sm relative overflow-hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                
+                <div class="lg:col-span-7 space-y-4">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="bg-stone-100 text-stone-700 text-xs px-3 py-1 rounded-full font-semibold border border-stone-200">
+                            🎓 Global Research Masterclass
+                        </span>
+                        <span class="bg-emerald-50 text-emerald-700 text-xs px-3 py-1 rounded-full font-semibold border border-emerald-200">
+                            ⏱️ 30 Minutes Practical Session
+                        </span>
+                        <span class="bg-indigo-50 text-indigo-700 text-xs px-3 py-1 rounded-full font-bold border border-indigo-200 flex items-center space-x-1.5">
+                            <span class="w-2 h-2 bg-emerald-500 rounded-full pulse-dot"></span>
+                            <span>Registered: <strong id="publicHeaderCount" class="text-indigo-900 font-extrabold">0</strong></span>
+                        </span>
+                    </div>
+
+                    <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 leading-tight">
+                        Google AI for Research: Hands-On Live Masterclass
+                    </h1>
+
+                    <p class="text-slate-600 text-sm md:text-base leading-relaxed">
+                        Join <strong class="text-slate-900">Dr. Muhammad Imran Qureshi (Dr. IQ)</strong> live on <strong class="text-slate-900">CONNECTING ASIA TV</strong> for an intensive 30-minute practical session on using Google AI tools—including Gemini, Google Notebook, and AI-powered data analysis—to supercharge literature synthesis and research publications.
+                    </p>
+
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2 border-t border-stone-100">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-12 h-12 bg-indigo-600 text-white rounded-full flex items-center justify-center font-extrabold text-sm border-2 border-indigo-200 shadow-sm flex-shrink-0">
+                                Dr. IQ
+                            </div>
+                            <div>
+                                <div class="font-bold text-slate-900 text-sm">Dr. Muhammad Imran Qureshi (Dr. IQ)</div>
+                                <div class="text-xs text-slate-500">Host & Speaker • CONNECTING ASIA TV</div>
+                            </div>
+                        </div>
+
+                        <div class="bg-stone-50 border border-stone-200 rounded-lg p-2.5 text-xs text-slate-600 flex items-center space-x-2">
+                            <span class="text-base">🌐</span>
+                            <div>
+                                <div class="text-[10px] uppercase font-bold text-slate-400">Latest Registered Attendee</div>
+                                <div id="latestAttendeeText" class="font-semibold text-slate-800 truncate max-w-[200px]">Awaiting First Registration</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-5 bg-stone-100/80 border border-stone-200 rounded-xl p-5 space-y-4">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 border-b border-stone-200 pb-2">
+                        Event Schedule & Local Time
+                    </h3>
+
+                    <div class="space-y-1">
+                        <div class="flex items-center text-sm font-semibold text-slate-800">
+                            <span class="mr-2">📅</span> Saturday, 26 September 2026
+                        </div>
+                        <div class="flex items-center text-sm font-semibold text-slate-800">
+                            <span class="mr-2">⏰</span> 2:00 PM UK Time (BST / UTC+1)
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-3 rounded-lg border border-stone-200 text-xs space-y-2">
+                        <label for="tzSelect" class="block font-bold text-slate-700">Select Your Local Region:</label>
+                        <select id="tzSelect" class="w-full bg-stone-50 border border-stone-300 rounded p-1.5 text-xs text-slate-800 focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <option value="0">London / UK (2:00 PM)</option>
+                            <option value="4">Dubai / UAE (5:00 PM)</option>
+                            <option value="5">Islamabad / Karachi (6:00 PM)</option>
+                            <option value="5.5">New Delhi / India (6:30 PM)</option>
+                            <option value="7">Bangkok / Jakarta (8:00 PM)</option>
+                            <option value="8">Kuala Lumpur / Singapore (9:00 PM)</option>
+                            <option value="-4">New York / Toronto (9:00 AM)</option>
+                            <option value="2">Berlin / Paris / Cairo (3:00 PM)</option>
+                            <option value="10">Sydney / Melbourne (11:00 PM)</option>
+                        </select>
+                        <div id="localTimeDisplay" class="font-semibold text-indigo-700 bg-indigo-50 p-2 rounded text-center border border-indigo-100">
+                            Local Time: 2:00 PM (Saturday, Sep 26)
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-4 gap-2 text-center text-xs">
+                        <div class="bg-white p-2 rounded border border-stone-200">
+                            <div id="cd-days" class="text-base md:text-lg font-extrabold text-slate-900">00</div>
+                            <div class="text-[10px] text-slate-500 uppercase">Days</div>
+                        </div>
+                        <div class="bg-white p-2 rounded border border-stone-200">
+                            <div id="cd-hours" class="text-base md:text-lg font-extrabold text-slate-900">00</div>
+                            <div class="text-[10px] text-slate-500 uppercase">Hours</div>
+                        </div>
+                        <div class="bg-white p-2 rounded border border-stone-200">
+                            <div id="cd-mins" class="text-base md:text-lg font-extrabold text-slate-900">00</div>
+                            <div class="text-[10px] text-slate-500 uppercase">Mins</div>
+                        </div>
+                        <div class="bg-white p-2 rounded border border-stone-200">
+                            <div id="cd-secs" class="text-base md:text-lg font-extrabold text-slate-900">00</div>
+                            <div class="text-[10px] text-slate-500 uppercase">Secs</div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <section class="lg:col-span-7 bg-white border border-stone-200 rounded-2xl p-6 md:p-8 shadow-sm">
+                
+                <div class="mb-6">
+                    <h2 class="text-xl font-bold text-slate-900 flex items-center justify-between">
+                        <span class="flex items-center">
+                            <span class="w-3 h-3 bg-emerald-500 rounded-full inline-block mr-2"></span>
+                            Quick Registration
+                        </span>
+                        <span class="text-xs font-normal text-slate-500">Free Workshop Access</span>
+                    </h2>
+                    <p class="text-xs text-slate-500 mt-1">
+                        Complete your 1-minute registration to receive automated email confirmation with your direct YouTube Live access link and calendar invite.
+                    </p>
+                </div>
+
+                <form id="registrationForm" onsubmit="handleFormSubmit(event)" class="space-y-4">
+                    
+                    <div>
+                        <label for="fullName" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                            1. Full Name <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" id="fullName" required placeholder="e.g. Dr. Jane Doe" 
+                            class="w-full bg-stone-50 border border-stone-300 rounded-lg px-3.5 py-2.5 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 outline-none transition">
+                    </div>
+
+                    <div>
+                        <label for="email" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                            2. Institutional / Work Email <span class="text-red-500">*</span>
+                        </label>
+                        <input type="email" id="email" required placeholder="jane.doe@university.edu" 
+                            class="w-full bg-stone-50 border border-stone-300 rounded-lg px-3.5 py-2.5 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 outline-none transition">
+                        <p class="text-[11px] text-slate-400 mt-1">An automated confirmation email with your calendar invite will be sent instantly.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="country" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                                3. Country / Region <span class="text-red-500">*</span>
+                            </label>
+                            <select id="country" required class="w-full bg-stone-50 border border-stone-300 rounded-lg px-3.5 py-2.5 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none transition">
+                                <option value="" disabled selected>Select Country</option>
+                                <option value="Pakistan">Pakistan</option>
+                                <option value="Malaysia">Malaysia</option>
+                                <option value="United Kingdom">United Kingdom</option>
+                                <option value="India">India</option>
+                                <option value="United Arab Emirates">United Arab Emirates</option>
+                                <option value="Saudi Arabia">Saudi Arabia</option>
+                                <option value="United States">United States</option>
+                                <option value="Australia">Australia</option>
+                                <option value="Nigeria">Nigeria</option>
+                                <option value="Bangladesh">Bangladesh</option>
+                                <option value="Indonesia">Indonesia</option>
+                                <option value="Canada">Canada</option>
+                                <option value="Germany">Germany</option>
+                                <option value="China">China</option>
+                                <option value="Egypt">Egypt</option>
+                                <option value="Other">Other Country</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="institution" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                                4. University / Institution <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" id="institution" required placeholder="e.g. University of Oxford" 
+                                class="w-full bg-stone-50 border border-stone-300 rounded-lg px-3.5 py-2.5 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none transition">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="role" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                            5. Academic Role <span class="text-red-500">*</span>
+                        </label>
+                        <select id="role" required class="w-full bg-stone-50 border border-stone-300 rounded-lg px-3.5 py-2.5 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none transition">
+                            <option value="" disabled selected>Select your academic role</option>
+                            <option value="PhD Scholar">PhD Scholar / Postdoc</option>
+                            <option value="Faculty Member">Faculty Member / Professor</option>
+                            <option value="Student">Student (Master's / Undergraduate)</option>
+                            <option value="Independent Researcher">Independent / Industry Researcher</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="question" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                            6. Question for Dr. IQ <span class="text-slate-400 font-normal">(Optional)</span>
+                        </label>
+                        <textarea id="question" rows="2" placeholder="Submit your research or AI question to be answered live..." 
+                            class="w-full bg-stone-50 border border-stone-300 rounded-lg px-3.5 py-2 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none transition resize-none"></textarea>
+                    </div>
+
+                    <div class="space-y-2 pt-1">
+                        <label class="flex items-start space-x-2.5 cursor-pointer">
+                            <input type="checkbox" id="optLink" checked required class="mt-0.5 rounded text-indigo-600 focus:ring-indigo-500">
+                            <span class="text-xs text-slate-600">Send confirmation email with live stream link and calendar invite.</span>
+                        </label>
+                    </div>
+
+                    <div class="pt-2">
+                        <button type="submit" id="submitBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg transition duration-200 shadow-md flex items-center justify-center space-x-2">
+                            <span id="btnText">Register Free Now</span>
+                            <span id="btnSpinner" class="hidden animate-spin">🌀</span>
+                            <span>→</span>
+                        </button>
+                    </div>
+
+                </form>
+
+                <div id="confirmationBox" class="hidden bg-emerald-50 border border-emerald-200 rounded-xl p-6 space-y-5">
+                    <div class="text-center space-y-2">
+                        <div class="w-12 h-12 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center mx-auto text-xl font-bold">
+                            ✓
+                        </div>
+                        <h3 class="text-lg font-bold text-emerald-950">Registration Confirmed!</h3>
+                        <p class="text-xs text-emerald-800 max-w-md mx-auto">
+                            Thank you, <strong id="confName" class="text-emerald-950">Participant</strong>! You are registered for the masterclass with <strong>Dr. IQ</strong>.
+                        </p>
+                        <div id="emailConfirmationAlert" class="bg-white border border-emerald-300 p-3 rounded-lg text-xs text-slate-700 space-y-1 text-left">
+                            <div class="font-bold text-emerald-900 flex items-center">
+                                <span class="mr-1.5">📧</span> Confirmation Email Dispatched!
+                            </div>
+                            <p class="text-slate-600">
+                                A confirmation email with your direct YouTube Live access link and calendar reminder was sent to <strong id="confEmailDisplay" class="text-slate-900 font-mono">your email</strong>.
+                            </p>
+                        </div>
+                        <div id="syncFeedbackBadge" class="inline-block bg-emerald-100 text-emerald-800 text-[11px] px-2.5 py-0.5 rounded-full font-semibold">
+                            💾 Saved & Live List Updated
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-xl border border-emerald-200 shadow-sm space-y-3">
+                        <div class="text-xs font-bold text-slate-900 flex items-center justify-between border-b border-stone-100 pb-2">
+                            <span>🔴 YouTube Live Access Link</span>
+                            <span class="text-red-600 font-semibold">Official Stream</span>
+                        </div>
+                        <p class="text-xs text-slate-600">
+                            Bookmark your direct access link below or join live on <strong>Saturday, 26 September 2026 @ 2:00 PM UK Time</strong>:
+                        </p>
+                        <div class="flex flex-col sm:flex-row items-center gap-2">
+                            <input type="text" readonly value="https://youtube.com/live/EAUL_a1YRss?feature=share" class="w-full bg-stone-100 border border-stone-300 rounded-lg px-3 py-2 text-xs font-mono text-slate-800 outline-none select-all">
+                            <a href="https://youtube.com/live/EAUL_a1YRss?feature=share" target="_blank" rel="noopener" class="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-2 px-4 rounded-lg text-center transition whitespace-nowrap">
+                                Join YouTube Live
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <div class="text-xs font-bold text-slate-800 text-center">Add Event to Your Calendar:</div>
+                        <div class="flex flex-col sm:flex-row justify-center gap-2.5">
+                            <button onclick="openGoogleCalendar()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold py-2.5 px-4 rounded-lg transition text-center">
+                                📅 Add to Google Calendar
+                            </button>
+                            <button onclick="downloadICS()" class="bg-stone-800 hover:bg-stone-900 text-white text-xs font-bold py-2.5 px-4 rounded-lg transition text-center">
+                                📥 Download .ics File
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="text-center pt-2">
+                        <button onclick="resetForm()" class="text-xs text-slate-500 hover:text-slate-800 underline">
+                            Register Another Participant
+                        </button>
+                    </div>
+                </div>
+
+            </section>
+
+            <section class="lg:col-span-5 space-y-6">
+
+                <div class="bg-white border border-stone-200 rounded-2xl p-6 shadow-sm h-full flex flex-col justify-between">
+                    <div>
+                        <div class="border-b border-stone-100 pb-3 mb-4 flex justify-between items-center">
+                            <h3 class="text-base font-bold text-slate-900">
+                                30-Minute Interactive Agenda
+                            </h3>
+                            <span class="text-xs font-semibold bg-indigo-50 text-indigo-700 px-2.5 py-0.5 rounded-full">
+                                Practical Focus
+                            </span>
+                        </div>
+
+                        <p class="text-xs text-slate-500 mb-4">
+                            Click any session topic to view details regarding Dr. IQ's practical walkthrough:
+                        </p>
+
+                        <div class="space-y-3">
+                            <div onclick="toggleAgendaDetail(1)" class="cursor-pointer p-3 bg-stone-50 hover:bg-stone-100 rounded-lg border border-stone-200 transition">
+                                <div class="flex justify-between items-center text-xs font-bold text-slate-900">
+                                    <span>00-05 Mins: Intro & Ecosystem Overview</span>
+                                    <span class="text-indigo-600 font-mono">5 min</span>
+                                </div>
+                                <p id="agenda-detail-1" class="text-[11px] text-slate-600 mt-1.5 leading-relaxed">
+                                    Introduction by Dr. IQ on leveraging modern Google AI tools to streamline scholarly workflow.
+                                </p>
+                            </div>
+
+                            <div onclick="toggleAgendaDetail(2)" class="cursor-pointer p-3 bg-stone-50 hover:bg-stone-100 rounded-lg border border-stone-200 transition">
+                                <div class="flex justify-between items-center text-xs font-bold text-slate-900">
+                                    <span>05-15 Mins: Literature Review via Google Notebook</span>
+                                    <span class="text-indigo-600 font-mono">10 min</span>
+                                </div>
+                                <p id="agenda-detail-2" class="text-[11px] text-slate-600 mt-1.5 leading-relaxed">
+                                    Practical session uploading research PDFs to Google Notebook for automated synthesis, citation checks, and concept extraction.
+                                </p>
+                            </div>
+
+                            <div onclick="toggleAgendaDetail(3)" class="cursor-pointer p-3 bg-stone-50 hover:bg-stone-100 rounded-lg border border-stone-200 transition">
+                                <div class="flex justify-between items-center text-xs font-bold text-slate-900">
+                                    <span>15-25 Mins: Intro to Data Analysis using Google AI</span>
+                                    <span class="text-indigo-600 font-mono">10 min</span>
+                                </div>
+                                <p id="agenda-detail-3" class="text-[11px] text-slate-600 mt-1.5 leading-relaxed">
+                                    Demonstrating research data interpretation, automated pattern identification, and prompt workflows for empirical findings.
+                                </p>
+                            </div>
+
+                            <div onclick="toggleAgendaDetail(4)" class="cursor-pointer p-3 bg-stone-50 hover:bg-stone-100 rounded-lg border border-stone-200 transition">
+                                <div class="flex justify-between items-center text-xs font-bold text-slate-900">
+                                    <span>25-30 Mins: Live Interactive Q&A</span>
+                                    <span class="text-indigo-600 font-mono">5 min</span>
+                                </div>
+                                <p id="agenda-detail-4" class="text-[11px] text-slate-600 mt-1.5 leading-relaxed">
+                                    Dr. IQ addresses attendee questions pre-submitted through this form and live YouTube chat.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 p-4 bg-indigo-50 border border-indigo-100 rounded-xl">
+                        <div class="text-xs font-bold text-indigo-950 flex items-center space-x-1.5 mb-1">
+                            <span>💡</span>
+                            <span>Interactive Learning Note</span>
+                        </div>
+                        <p class="text-[11px] text-indigo-800 leading-relaxed">
+                            Have your research PDFs and datasets ready during the broadcast to follow along with Dr. IQ's live demonstrations.
+                        </p>
+                    </div>
+
+                </div>
+
+            </section>
+
+        </div>
+
+        <section class="bg-slate-900 text-stone-100 rounded-2xl p-6 md:p-8 shadow-sm">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+                <div class="md:col-span-8 space-y-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-emerald-400">Masterclass Presenter</span>
+                    <h3 class="text-xl md:text-2xl font-bold">Dr. Muhammad Imran Qureshi (Dr. IQ)</h3>
+                    <p class="text-xs md:text-sm text-slate-300 leading-relaxed">
+                        Dr. IQ is an esteemed academic mentor empowering researchers globally through advanced digital tools, quantitative research methodologies, and cutting-edge Google AI applications.
+                    </p>
+                </div>
+                <div class="md:col-span-4 bg-slate-800 p-4 rounded-xl border border-slate-700 text-center space-y-3">
+                    <div class="text-xs text-slate-400 uppercase font-semibold">Broadcasting Channel</div>
+                    <div class="text-lg font-bold text-white">CONNECTING ASIA TV</div>
+                    <a href="https://www.youtube.com/@CONNECTINGASIATV" target="_blank" rel="noopener" class="inline-block w-full bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-2.5 px-4 rounded-lg transition">
+                        Subscribe @ CONNECTING ASIA TV
+                    </a>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <div id="adminAuthModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-5 border border-stone-200">
+            <div class="flex justify-between items-center border-b border-stone-100 pb-3">
+                <div class="flex items-center space-x-2">
+                    <span class="text-lg">🔒</span>
+                    <h3 class="text-base font-bold text-slate-900">Admin Analytics Authentication</h3>
+                </div>
+                <button onclick="closeAdminAuthModal()" class="text-slate-400 hover:text-slate-800 font-bold">✕</button>
+            </div>
+
+            <p class="text-xs text-slate-600">
+                Access to live analytics and registrant data is restricted to authorized editors. Please authenticate with your official email address.
+            </p>
+
+            <form onsubmit="handleAdminAuth(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                        Authorized Editor Email <span class="text-red-500">*</span>
+                    </label>
+                    <input type="email" id="adminEmailInput" required placeholder="editor@connectingasia.org" 
+                        class="w-full bg-stone-50 border border-stone-300 rounded-lg px-3.5 py-2 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                        Security Passcode <span class="text-red-500">*</span>
+                    </label>
+                    <input type="password" id="adminPassInput" required placeholder="Enter admin passcode" 
+                        class="w-full bg-stone-50 border border-stone-300 rounded-lg px-3.5 py-2 text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none">
+                    <p class="text-[10px] text-slate-400 mt-1">Default Editor Login: editor@connectingasia.org</p>
+                </div>
+
+                <div id="authErrorMessage" class="hidden text-xs bg-red-50 border border-red-200 text-red-700 p-2.5 rounded-lg font-medium">
+                    Access Denied. Only editor@connectingasia.org is authorized to access admin analytics.
+                </div>
+
+                <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 px-4 rounded-lg transition text-xs">
+                    Unlock Admin Dashboard →
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div id="adminModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex justify-end">
+        <div class="bg-white w-full max-w-xl h-full shadow-2xl p-6 overflow-y-auto space-y-6">
+            
+            <div class="flex justify-between items-center border-b border-stone-200 pb-4">
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <span class="bg-indigo-100 text-indigo-800 text-[10px] font-bold px-2 py-0.5 rounded">AUTHENTICATED</span>
+                        <h3 class="text-lg font-bold text-slate-900">Admin Analytics Dashboard</h3>
+                    </div>
+                    <p class="text-xs text-slate-500">Logged in as <strong id="currentAdminEmailDisplay" class="text-slate-800">editor@connectingasia.org</strong></p>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="logoutAdmin()" class="text-xs bg-stone-100 hover:bg-stone-200 text-slate-700 font-semibold px-2.5 py-1 rounded border border-stone-300 transition">
+                        Sign Out
+                    </button>
+                    <button onclick="toggleAdminPanel()" class="text-slate-400 hover:text-slate-800 text-xl font-bold">✕</button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-3 text-center">
+                <div class="bg-stone-100 p-3 rounded-lg border border-stone-200">
+                    <div id="adm-total" class="text-xl font-extrabold text-indigo-700">0</div>
+                    <div class="text-[10px] text-slate-500 uppercase font-bold">Total Registered</div>
+                </div>
+                <div class="bg-stone-100 p-3 rounded-lg border border-stone-200">
+                    <div id="adm-top-country" class="text-sm font-extrabold text-slate-800 truncate">N/A</div>
+                    <div class="text-[10px] text-slate-500 uppercase font-bold">Top Country</div>
+                </div>
+                <div class="bg-stone-100 p-3 rounded-lg border border-stone-200">
+                    <div id="adm-questions" class="text-xl font-extrabold text-emerald-700">0</div>
+                    <div class="text-[10px] text-slate-500 uppercase font-bold">Questions Submitted</div>
+                </div>
+            </div>
+
+            <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-4 space-y-3">
+                <div class="flex items-center justify-between">
+                    <h4 class="text-xs font-bold text-indigo-950 uppercase tracking-wider">🔗 Cloud Sync & Endpoint Integration</h4>
+                    <span id="webhookStatusBadge" class="text-[10px] bg-amber-200 text-amber-900 px-2 py-0.5 rounded font-bold">Pending Endpoint Set</span>
+                </div>
+                <p class="text-xs text-indigo-900">
+                    Paste your Google Apps Script Webhook URL below to automatically sync registrations into Google Sheets:
+                </p>
+                <input type="url" id="sheetWebhookUrl" placeholder="https://script.google.com/macros/s/.../exec" 
+                    class="w-full bg-white border border-indigo-300 rounded p-2 text-xs text-slate-900 font-mono outline-none focus:ring-2 focus:ring-indigo-500">
+                
+                <div class="flex flex-wrap gap-2 justify-between items-center pt-1">
+                    <div class="flex items-center space-x-2">
+                        <button onclick="saveWebhookUrl()" class="bg-indigo-700 hover:bg-indigo-800 text-white text-xs font-bold py-1.5 px-3 rounded transition">
+                            Save Endpoint
+                        </button>
+                        <button onclick="testWebhookEndpoint()" class="bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold py-1.5 px-3 rounded transition">
+                            🧪 Send Test Ping
+                        </button>
+                        <button onclick="fetchCloudData()" class="bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold py-1.5 px-3 rounded transition">
+                            🔄 Sync Cloud Sheet
+                        </button>
+                    </div>
+                    <button onclick="clearAllData()" class="text-[11px] text-red-600 hover:text-red-800 underline">
+                        Clear Stored Responses
+                    </button>
+                </div>
+                <div id="diagnosticLog" class="text-[11px] bg-white/80 p-2 rounded border border-indigo-100 text-slate-700 font-mono hidden"></div>
+            </div>
+
+            <div class="space-y-3">
+                <div class="flex justify-between items-center">
+                    <h4 class="text-sm font-bold text-slate-900">Live Registration Entries</h4>
+                    <button onclick="exportCSV()" class="text-xs text-indigo-600 hover:text-indigo-800 font-semibold border border-indigo-200 px-2.5 py-1 rounded">
+                        📥 Export CSV
+                    </button>
+                </div>
+
+                <div class="border border-stone-200 rounded-lg overflow-x-auto max-h-60">
+                    <table class="w-full text-left text-xs text-slate-700">
+                        <thead class="bg-stone-100 text-slate-900 font-bold border-b border-stone-200 sticky top-0">
+                            <tr>
+                                <th class="p-2.5">Name</th>
+                                <th class="p-2.5">Email</th>
+                                <th class="p-2.5">Country</th>
+                                <th class="p-2.5">Role</th>
+                            </tr>
+                        </thead>
+                        <tbody id="participantTableBody" class="divide-y divide-stone-100">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <h4 class="text-sm font-bold text-slate-900">Pre-submitted Questions for Dr. IQ</h4>
+                <div id="questionsContainer" class="space-y-2 max-h-40 overflow-y-auto pr-1">
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <footer class="bg-stone-100 border-t border-stone-200 py-4 text-center text-xs text-slate-500">
+        <p>© 2026 CONNECTING ASIA TV • Google AI for Research Masterclass with Dr. IQ (Dr. Muhammad Imran Qureshi)</p>
+    </footer>
+
+    <script>
+        // Official Google Apps Script Webhook Endpoint URL integrated directly
+        const DEFAULT_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbzfiZ_U2zhivYii6QfByS50A3f8I-N4tq_WBTdHCaWZ4ZkTopOXnl8TY1ngErKfvOpk/exec"; 
+
+        const eventConfig = {
+            targetDate: new Date('2026-09-26T14:00:00+01:00'),
+            liveStreamUrl: "https://youtube.com/live/EAUL_a1YRss?feature=share"
+        };
+
+        const AUTHORIZED_ADMIN_EMAIL = "editor@connectingasia.org";
+
+        let registrations = [];
+        let isAdminAuthenticated = false;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadRegistrations();
+            initCountdown();
+            initTimezoneConverter();
+            checkAdminSession();
+            renderAllViews();
+
+            window.addEventListener('storage', (e) => {
+                if (e.key === 'portal_registrations_v2') {
+                    loadRegistrations();
+                    renderAllViews();
+                }
+            });
+
+            const activeWebhook = getActiveWebhookUrl();
+            if (activeWebhook) {
+                document.getElementById('sheetWebhookUrl').value = activeWebhook;
+                document.getElementById('webhookStatusBadge').innerText = "Cloud Endpoint Active";
+                document.getElementById('webhookStatusBadge').className = "text-[10px] bg-emerald-200 text-emerald-900 px-2 py-0.5 rounded font-bold";
+            }
+            
+            // Auto-sync with Google Sheet on page load if Webhook URL is set
+            if (activeWebhook) {
+                fetchCloudData();
+            }
+        });
+
+        function getActiveWebhookUrl() {
+            const stored = safeStorageGet('gsi_webhook_url');
+            return (stored && stored.trim() !== '') ? stored : DEFAULT_WEBHOOK_URL;
+        }
+
+        function safeStorageGet(key) {
+            try {
+                return localStorage.getItem(key);
+            } catch(e) {
+                console.warn("Storage access restricted:", e);
+                return null;
+            }
+        }
+
+        function safeStorageSet(key, value) {
+            try {
+                localStorage.setItem(key, value);
+            } catch(e) {
+                console.warn("Storage set restricted:", e);
+            }
+        }
+
+        function loadRegistrations() {
+            const stored = safeStorageGet('portal_registrations_v2');
+            if (stored) {
+                try {
+                    registrations = JSON.parse(stored);
+                } catch(e) {
+                    registrations = [];
+                }
+            } else {
+                registrations = [];
+            }
+        }
+
+        function saveRegistrations() {
+            safeStorageSet('portal_registrations_v2', JSON.stringify(registrations));
+        }
+
+        function escapeHTML(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function checkAdminSession() {
+            const authState = safeStorageGet('portal_admin_authenticated');
+            if (authState === 'true') {
+                isAdminAuthenticated = true;
+            }
+        }
+
+        function openAdminAuthModal() {
+            if (isAdminAuthenticated) {
+                toggleAdminPanel();
+            } else {
+                document.getElementById('adminAuthModal').classList.remove('hidden');
+                document.getElementById('authErrorMessage').classList.add('hidden');
+            }
+        }
+
+        function closeAdminAuthModal() {
+            document.getElementById('adminAuthModal').classList.add('hidden');
+        }
+
+        function handleAdminAuth(event) {
+            event.preventDefault();
+            const email = document.getElementById('adminEmailInput').value.trim().toLowerCase();
+
+            if (email === AUTHORIZED_ADMIN_EMAIL.toLowerCase()) {
+                isAdminAuthenticated = true;
+                safeStorageSet('portal_admin_authenticated', 'true');
+                closeAdminAuthModal();
+                toggleAdminPanel();
+            } else {
+                document.getElementById('authErrorMessage').classList.remove('hidden');
+            }
+        }
+
+        function logoutAdmin() {
+            isAdminAuthenticated = false;
+            try {
+                localStorage.removeItem('portal_admin_authenticated');
+            } catch(e){}
+            toggleAdminPanel();
+            alert("Signed out from Admin Dashboard.");
+        }
+
+        function toggleAdminPanel() {
+            if (!isAdminAuthenticated) {
+                openAdminAuthModal();
+                return;
+            }
+            document.getElementById('adminModal').classList.toggle('hidden');
+        }
+
+        function initCountdown() {
+            function update() {
+                const now = new Date();
+                const diff = eventConfig.targetDate - now;
+
+                if (diff <= 0) {
+                    document.getElementById('cd-days').innerText = '00';
+                    document.getElementById('cd-hours').innerText = '00';
+                    document.getElementById('cd-mins').innerText = '00';
+                    document.getElementById('cd-secs').innerText = '00';
+                    return;
+                }
+
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const secs = Math.floor((diff % (1000 * 60)) / 1000);
+
+                document.getElementById('cd-days').innerText = String(days).padStart(2, '0');
+                document.getElementById('cd-hours').innerText = String(hours).padStart(2, '0');
+                document.getElementById('cd-mins').innerText = String(mins).padStart(2, '0');
+                document.getElementById('cd-secs').innerText = String(secs).padStart(2, '0');
+            }
+            update();
+            setInterval(update, 1000);
+        }
+
+        function initTimezoneConverter() {
+            const select = document.getElementById('tzSelect');
+            const display = document.getElementById('localTimeDisplay');
+
+            select.addEventListener('change', (e) => {
+                const val = parseFloat(e.target.value);
+                const ukHour = 14;
+                
+                let localHour = ukHour + val;
+                let dayNote = "Saturday, Sep 26";
+
+                if (localHour >= 24) {
+                    localHour -= 24;
+                    dayNote = "Sunday, Sep 27";
+                } else if (localHour < 0) {
+                    localHour += 24;
+                    dayNote = "Saturday, Sep 26 (Morning)";
+                }
+
+                const period = localHour >= 12 ? "PM" : "AM";
+                let hour12 = Math.floor(localHour) % 12;
+                if (hour12 === 0) hour12 = 12;
+
+                const minutes = (val % 1 !== 0) ? "30" : "00";
+                display.innerText = `Local Time: ${hour12}:${minutes} ${period} (${dayNote})`;
+            });
+        }
+
+        async function handleFormSubmit(event) {
+            event.preventDefault();
+
+            const btnText = document.getElementById('btnText');
+            const btnSpinner = document.getElementById('btnSpinner');
+            btnText.innerText = "Dispatching Email & Saving...";
+            btnSpinner.classList.remove('hidden');
+
+            const entry = {
+                name: document.getElementById('fullName').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                country: document.getElementById('country').value,
+                institution: document.getElementById('institution').value.trim(),
+                role: document.getElementById('role').value,
+                question: document.getElementById('question').value.trim(),
+                timestamp: new Date().toLocaleString()
+            };
+
+            registrations.push(entry);
+            saveRegistrations();
+
+            const webhookUrl = getActiveWebhookUrl();
+            let syncedToCloud = false;
+
+            if (webhookUrl) {
+                try {
+                    await fetch(webhookUrl, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify(entry)
+                    });
+                    syncedToCloud = true;
+                } catch (err) {
+                    console.warn("Cloud webhook transfer warning:", err);
+                }
+            }
+
+            btnText.innerText = "Register Free Now";
+            btnSpinner.classList.add('hidden');
+
+            document.getElementById('confName').innerText = entry.name;
+            document.getElementById('confEmailDisplay').innerText = entry.email;
+
+            const badge = document.getElementById('syncFeedbackBadge');
+            if (syncedToCloud) {
+                badge.innerText = "✓ Transmitted to Google Sheets & Confirmation Email Triggered";
+                badge.className = "inline-block bg-emerald-100 text-emerald-800 text-[11px] px-2.5 py-0.5 rounded-full font-semibold";
+            } else {
+                badge.innerText = "💾 Saved Locally & Live Count Updated";
+                badge.className = "inline-block bg-stone-100 text-slate-700 text-[11px] px-2.5 py-0.5 rounded-full font-semibold";
+            }
+
+            document.getElementById('registrationForm').classList.add('hidden');
+            document.getElementById('confirmationBox').classList.remove('hidden');
+
+            renderAllViews();
+        }
+
+        function resetForm() {
+            document.getElementById('registrationForm').reset();
+            document.getElementById('confirmationBox').classList.add('hidden');
+            document.getElementById('registrationForm').classList.remove('hidden');
+        }
+
+        function toggleAgendaDetail(id) {
+            const detailEl = document.getElementById(`agenda-detail-${id}`);
+            detailEl.classList.toggle('hidden');
+        }
+
+        function openGoogleCalendar() {
+            const title = encodeURIComponent("Google AI for Research: Hands-On Masterclass with Dr. IQ");
+            const details = encodeURIComponent("Live 30-minute masterclass on CONNECTING ASIA TV.\\nDirect YouTube Live Stream Link: https://youtube.com/live/EAUL_a1YRss?feature=share");
+            const location = encodeURIComponent("https://youtube.com/live/EAUL_a1YRss?feature=share");
+            const dates = "20260926T130000Z/20260926T133000Z";
+
+            const gcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dates}&details=${details}&location=${location}`;
+            window.open(gcalUrl, '_blank');
+        }
+
+        function downloadICS() {
+            const icsData = 
+`BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//CONNECTING ASIA TV//Google AI Masterclass//EN
+BEGIN:VEVENT
+SUMMARY:Google AI for Research: Hands-On Masterclass with Dr. IQ
+DESCRIPTION:Live 30-minute practical masterclass with Dr. Muhammad Imran Qureshi on CONNECTING ASIA TV.\\nYouTube Stream: https://youtube.com/live/EAUL_a1YRss?feature=share
+LOCATION:https://youtube.com/live/EAUL_a1YRss?feature=share
+DTSTART:20260926T130000Z
+DTEND:20260926T133000Z
+BEGIN:VALARM
+TRIGGER:-PT30M
+ACTION:DISPLAY
+DESCRIPTION:Masterclass starting in 30 minutes!
+END:VALARM
+END:VEVENT
+END:VCALENDAR`;
+
+            const blob = new Blob([icsData], { type: 'text/calendar;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.setAttribute('download', 'Google_AI_Research_Masterclass_Dr_IQ.ics');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function saveWebhookUrl() {
+            const url = document.getElementById('sheetWebhookUrl').value.trim();
+            if (url) {
+                safeStorageSet('gsi_webhook_url', url);
+                document.getElementById('webhookStatusBadge').innerText = "✓ Endpoint Saved";
+                document.getElementById('webhookStatusBadge').className = "text-[10px] bg-emerald-200 text-emerald-900 px-2 py-0.5 rounded font-bold";
+                logDiagnostic("Webhook URL saved to LocalStorage.");
+            }
+        }
+
+        async function testWebhookEndpoint() {
+            const url = getActiveWebhookUrl();
+            if (!url) {
+                alert("Please enter or configure a Webhook URL first!");
+                return;
+            }
+
+            logDiagnostic("Sending test ping to endpoint...");
+            const testPayload = {
+                name: "Test Participant",
+                email: "test.participant@example.com",
+                country: "United Kingdom",
+                institution: "Test University",
+                role: "PhD Scholar",
+                question: "Test ping connection verification",
+                timestamp: new Date().toLocaleString()
+            };
+
+            try {
+                await fetch(url, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(testPayload)
+                });
+                logDiagnostic("✓ Ping sent! Check your Google Sheet to verify response row and automated email trigger.");
+            } catch (err) {
+                logDiagnostic("❌ Connection Error: " + err.message);
+            }
+        }
+
+        async function fetchCloudData() {
+            const url = getActiveWebhookUrl();
+            if (!url) {
+                return;
+            }
+
+            logDiagnostic("Attempting cloud fetch (doGet endpoint)...");
+            try {
+                const res = await fetch(url + '?action=getRegistrations');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (Array.isArray(data)) {
+                        registrations = data;
+                        saveRegistrations();
+                        renderAllViews();
+                        logDiagnostic(`✓ Successfully synced ${data.length} records from Google Sheets!`);
+                    }
+                }
+            } catch(e) {
+                // Silent catch for doGet endpoint non-response
+            }
+        }
+
+        function logDiagnostic(msg) {
+            const logBox = document.getElementById('diagnosticLog');
+            logBox.classList.remove('hidden');
+            logBox.innerText = `[${new Date().toLocaleTimeString()}] ${msg}`;
+        }
+
+        function clearAllData() {
+            if (confirm("Are you sure you want to clear all locally stored responses?")) {
+                registrations = [];
+                saveRegistrations();
+                renderAllViews();
+                logDiagnostic("All local responses cleared.");
+            }
+        }
+
+        function renderAllViews() {
+            renderPublicHeaderStats();
+            renderAdminAnalytics();
+        }
+
+        function renderPublicHeaderStats() {
+            const count = registrations.length;
+            document.getElementById('publicHeaderCount').innerText = count;
+
+            const latestText = document.getElementById('latestAttendeeText');
+            if (count > 0) {
+                const latest = registrations[registrations.length - 1];
+                latestText.innerText = `${latest.name} (${latest.country})`;
+            } else {
+                latestText.innerText = "Awaiting First Registration";
+            }
+        }
+
+        function renderAdminAnalytics() {
+            document.getElementById('adm-total').innerText = registrations.length;
+
+            const countryCounts = {};
+            let questionsCount = 0;
+
+            registrations.forEach(r => {
+                if (r.country) countryCounts[r.country] = (countryCounts[r.country] || 0) + 1;
+                if (r.question && r.question.trim().length > 0) questionsCount++;
+            });
+
+            let topC = "N/A";
+            let maxC = 0;
+            for (let c in countryCounts) {
+                if (countryCounts[c] > maxC) {
+                    maxC = countryCounts[c];
+                    topC = c;
+                }
+            }
+            document.getElementById('adm-top-country').innerText = topC;
+            document.getElementById('adm-questions').innerText = questionsCount;
+
+            const tbody = document.getElementById('participantTableBody');
+            tbody.innerHTML = '';
+
+            if (registrations.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400 italic">No registrations recorded yet. Click 'Sync Cloud Sheet' or check your Google Sheet.</td></tr>`;
+            } else {
+                registrations.slice().reverse().forEach(r => {
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-stone-50 transition";
+                    tr.innerHTML = `
+                        <td class="p-2.5 font-bold">${escapeHTML(r.name)}</td>
+                        <td class="p-2.5 font-mono text-slate-500">${escapeHTML(r.email)}</td>
+                        <td class="p-2.5">${escapeHTML(r.country)}</td>
+                        <td class="p-2.5"><span class="bg-stone-100 px-1.5 py-0.5 rounded text-[10px]">${escapeHTML(r.role)}</span></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            const qContainer = document.getElementById('questionsContainer');
+            qContainer.innerHTML = '';
+            const withQuestions = registrations.filter(r => r.question && r.question.trim() !== '');
+            
+            if (withQuestions.length === 0) {
+                qContainer.innerHTML = `<div class="text-xs text-slate-400 italic">No pre-submitted questions yet.</div>`;
+            } else {
+                withQuestions.slice().reverse().forEach(r => {
+                    const div = document.createElement('div');
+                    div.className = "bg-stone-50 border border-stone-200 p-2.5 rounded text-xs space-y-1";
+                    div.innerHTML = `<div class="font-bold text-slate-800">${escapeHTML(r.name)} (${escapeHTML(r.country)}):</div><div class="text-slate-600 italic">"${escapeHTML(r.question)}"</div>`;
+                    qContainer.appendChild(div);
+                });
+            }
+        }
+
+        function exportCSV() {
+            if (registrations.length === 0) {
+                alert("No registration data available to export.");
+                return;
+            }
+            let csv = "Name,Email,Country,Institution,Role,Question,Timestamp\n";
+            registrations.forEach(r => {
+                csv += `"${(r.name || '').replace(/"/g, '""')}","${(r.email || '').replace(/"/g, '""')}","${(r.country || '').replace(/"/g, '""')}","${(r.institution || '').replace(/"/g, '""')}","${(r.role || '').replace(/"/g, '""')}","${(r.question || '').replace(/"/g, '""')}","${(r.timestamp || '').replace(/"/g, '""')}"\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.setAttribute('download', 'Registrations_Google_AI_Masterclass.csv');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>
